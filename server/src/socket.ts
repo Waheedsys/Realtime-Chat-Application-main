@@ -14,10 +14,12 @@ const EVENTS = {
     JOINED_ROOM: "JOINED_ROOM",
     ROOM_MESSAGE: "ROOM_MESSAGE",
     ROOM_CREATION_FAILED: "ROOM_CREATION_FAILED",
+    ACTIVE_USERS: "ACTIVE_USERS",
   },
 };
 
 const rooms: Record<string, { name: string }> = {};
+const usersInRoom: Record<string, { [socketId: string]: string }> = {}; // Track users in rooms
 
 function socket({ io }: { io: Server }) {
   logger.info(`Sockets enabled`);
@@ -38,55 +40,72 @@ function socket({ io }: { io: Server }) {
         });
         return;
       }
-      // add a new room to the rooms object
-      rooms[roomId] = {
-        name: roomName,
-      };
+      // Add a new room to the rooms object
+      rooms[roomId] = { name: roomName };
+      usersInRoom[roomId] = {}; // Initialize user tracking for the room
 
       socket.join(roomId);
 
-      // broadcast an event saying there is a new room
+      // Broadcast an event saying there is a new room
       socket.broadcast.emit(EVENTS.SERVER.ROOMS, rooms);
 
-      // emit back to the room creator with all the rooms
+      // Emit back to the room creator with all the rooms
       socket.emit(EVENTS.SERVER.ROOMS, rooms);
-      // emit event back the room creator saying they have joined a room
+      // Emit event back to the room creator saying they have joined the room
       socket.emit(EVENTS.SERVER.JOINED_ROOM, roomId);
     });
 
     /*
      * When a user sends a room message
      */
-    socket.on(
-      EVENTS.CLIENT.SEND_ROOM_MESSAGE,
-      ({ roomId, message, username }) => {
-        const date = new Date();
+    socket.on(EVENTS.CLIENT.SEND_ROOM_MESSAGE, ({ roomId, message, username }) => {
+      const date = new Date();
 
-        socket.to(roomId).emit(EVENTS.SERVER.ROOM_MESSAGE, {
-          message,
-          username,
-          time: `${date.getHours()}:${date.getMinutes()}`,
-        });
-      }
-    );
+      socket.to(roomId).emit(EVENTS.SERVER.ROOM_MESSAGE, {
+        message,
+        username,
+        time: `${date.getHours()}:${date.getMinutes()}`,
+      });
+    });
 
     /*
      * When a user joins a room
      */
-    socket.on(EVENTS.CLIENT.JOIN_ROOM, (roomId) => {
+    socket.on(EVENTS.CLIENT.JOIN_ROOM, ({ roomId, username }) => {
       if (rooms[roomId]) {
         // Join the room if it exists
         socket.join(roomId);
+
+        // Add the user to the room's user list using socketId
+        usersInRoom[roomId][socket.id] = username;
+
+        // Emit the updated user list to the room
+        io.to(roomId).emit(EVENTS.SERVER.ACTIVE_USERS, Object.values(usersInRoom[roomId]));
+
         socket.emit(EVENTS.SERVER.JOINED_ROOM, roomId);
       } else {
-        // If room doesn't exist, send an error message
+        // If the room doesn't exist, send an error message
         socket.emit(EVENTS.SERVER.ROOM_CREATION_FAILED, {
           message: "Room ID does not exist.",
         });
       }
-    }); // Closing bracket for JOIN_ROOM event handler
+    });
 
-  }); // Closing bracket for io.on
+    /*
+     * When a user disconnects
+     */
+    socket.on('disconnect', () => {
+      for (const roomId in usersInRoom) {
+        if (usersInRoom[roomId][socket.id]) {
+          // Remove the user associated with this socket ID
+          delete usersInRoom[roomId][socket.id];
+
+          // Emit the updated user list to the room
+          io.to(roomId).emit(EVENTS.SERVER.ACTIVE_USERS, Object.values(usersInRoom[roomId]));
+        }
+      }
+    });
+  });
 }
 
 export default socket;
