@@ -1,6 +1,4 @@
-# Chat application with React.js, Node.js & Socket.io
-
-Video: https://www.youtube.com/watch?v=a_xo-SbIfUQ
+# Chat application with typescript, React.js, Node.js & Socket.io
 
 ## What are we building?
 A chat application with rooms
@@ -17,12 +15,7 @@ A chat application with rooms
 - React hooks
 - Context API
 - TypeScript
-- [CSS Modules](https://nextjs.org/docs/basic-features/built-in-css-support#adding-component-level-css)
-
-## What will you learn?
-- How sockets work on the server and the client
-- How to setup socket.io-client correctly in React
-- How to organize code for maintainability
+- CSS Modules
 
 ## Structure
 1. Bootstrap backend
@@ -34,7 +27,6 @@ A chat application with rooms
 7. Add send message functionality
 8. Styling
 
-[Socket.io Emit cheatsheet](https://socket.io/docs/v3/emit-cheatsheet/index.html)
 
 ## Screenshots
 ### Home screen
