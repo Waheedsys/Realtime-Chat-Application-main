@@ -1,9 +1,8 @@
 # Chat application with typescript, React.js, Node.js & Socket.io
 
-## What are we building?
 A chat application with rooms
 
-## What technologies are we using?
+## technologies used
 ### Node.js
 - Socket.io
 - ExpressJS
@@ -25,16 +24,17 @@ A chat application with rooms
 5. Add set username functionality
 6. Add create room functionality
 7. Add send message functionality
-8. Styling
+8. Add unique Id functionality
+9. Add Active user functionality
 
 
 ## Screenshots
 ### Home screen
-![](./screenshots/1.png)
-### No rooms
-![](./screenshots/2.png)
+![ei2](https://github.com/user-attachments/assets/a0a69dff-a60e-4af4-ab91-bbded5e8e9cf)
+### rooms
+![ei1](https://github.com/user-attachments/assets/e5c4231b-36bd-4461-b2e1-c6f2894ea769)
 ### In chat
-![](./screenshots/3.png)
+![ei4](https://github.com/user-attachments/assets/b7606d81-a8f8-42f8-a4ed-c52e1e724169)
 
 
 
